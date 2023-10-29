@@ -1,15 +1,17 @@
-from typing import Union
+from typing import Union, List
 
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from logic import play
+
 app = FastAPI()
 
 
-class Item(BaseModel):
-    name: str
-    price: float
-    is_offer: Union[bool, None] = None
+class GameState(BaseModel):
+    state: List[str]
+    maxi: str
+    mini: str
 
 
 @app.get("/")
@@ -17,6 +19,7 @@ def read_root():
     return {"Hello": "World"}
 
 
-@app.get("/items/{item_id}")
-def read_item(item_id: int, q: Union[str, None] = None):
-    return {"item_id": item_id, "q": q}
+@app.post("/play")
+def make_play(game_state: GameState):
+    play_response = play(game_state.state, game_state.mini, game_state.maxi)
+    return {"state": play_response[0], "game_status": play_response[1]}
